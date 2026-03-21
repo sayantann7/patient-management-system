@@ -25,7 +25,14 @@ public class KafkaProducer {
                 .setEventType(eventType)
                 .build();
         try{
-            kafkaTemplate.send("patient",event.toByteArray());
+            kafkaTemplate.send("patient", event.toByteArray())
+                    .whenComplete((result, ex) -> {
+                        if (ex != null) {
+                            log.error("Failed to send Kafka event", ex);
+                        } else {
+                            log.info("Event sent successfully: {}", event.getEventType());
+                        }
+                    });
         }catch(Exception e){
             log.error("Error sending PatientCreated event : {}",event);
         }
