@@ -4,6 +4,8 @@ import com.pm.patientservice.dto.PatientRequestDTO;
 import com.pm.patientservice.dto.PatientResponseDTO;
 import com.pm.patientservice.exception.EmailAlreadyExistsException;
 import com.pm.patientservice.exception.PatientNotFoundException;
+import com.pm.patientservice.grpc.BillingServiceGrpcClient;
+import com.pm.patientservice.kafka.KafkaProducer;
 import com.pm.patientservice.mapper.PatientMapper;
 import com.pm.patientservice.model.Patient;
 import com.pm.patientservice.repository.PatientRepository;
@@ -16,10 +18,15 @@ import java.util.UUID;
 @Service
 public class PatientService {
 
-    private PatientRepository patientRepository;
+    private final PatientRepository patientRepository;
+    private final BillingServiceGrpcClient billingServiceGrpcClient;
+    private final KafkaProducer kafkaProducer;
 
-    public PatientService(PatientRepository patientRepository){
+    public PatientService(PatientRepository patientRepository,
+                          BillingServiceGrpcClient billingServiceGrpcClient, KafkaProducer kafkaProducer) {
         this.patientRepository = patientRepository;
+        this.billingServiceGrpcClient = billingServiceGrpcClient;
+        this.kafkaProducer = kafkaProducer;
     }
 
     public List<PatientResponseDTO> getPatients(){
@@ -37,6 +44,12 @@ public class PatientService {
         }
 
         Patient newPatient = patientRepository.save(PatientMapper.toModel(patientRequestDTO));
+
+        kafkaProducer.sendEvent(newPatient, "PATIENT_CREATED");
+
+        billingServiceGrpcClient.createBillingAccount(newPatient.getId().toString(),
+                newPatient.getName(), newPatient.getEmail());
+
         return PatientMapper.toDTO(newPatient);
     }
 
@@ -53,10 +66,15 @@ public class PatientService {
         patient.setDateOfBirth(LocalDate.parse(patientRequestDTO.getDateOfBirth()));
 
         Patient updatedPatient = patientRepository.save(patient);
+
+        kafkaProducer.sendEvent(updatedPatient, "PATIENT_UPDATED");
+
         return PatientMapper.toDTO(updatedPatient);
     }
 
     public void deletePatient(UUID id){
+        Patient patient = patientRepository.findById(id).orElseThrow();
+        kafkaProducer.sendEvent(patient, "PATIENT_DELETED");
         patientRepository.deleteById(id);
     }
 
