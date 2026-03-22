@@ -8,7 +8,7 @@
           <list>
             <DockerEnvVarImpl>
               <option name="name" value="JWT_SECRET" />
-              <option name="value" value="we474o5uG34ojitufweee63nywegwiojitu9239thneWG34oqnhng" />
+              <option name="value" value="7AFYkrTH/fDQq3VjBzGy6ZP4ed7vnRRF3kBACEcXVz8=" />
             </DockerEnvVarImpl>
             <DockerEnvVarImpl>
               <option name="name" value="SPRING_DATASOURCE_PASSWORD" />
