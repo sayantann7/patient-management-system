@@ -14,7 +14,7 @@ spring:
           predicates:
             - Path=/auth/**
           filters:
-            - RewritePath=/auth/?(?<segment>.*), /${segment}
+            - StripPrefix=1
 
         # Route for /api/patients/** to patient-service
         - id: patient-service-route
@@ -23,6 +23,7 @@ spring:
             - Path=/api/patients/**
           filters:
             - StripPrefix=1
+            - JwtValidation
 
         # Route for /api/docs/patients to patient-service /v3/api-docs
         - id: api-docs-patient-route
