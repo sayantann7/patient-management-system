@@ -18,7 +18,7 @@ spring:
 
         # Route for /api/patients/** to patient-service
         - id: patient-service-route
-          uri: http://patient-service.patient-management:4000
+          uri: http://patient-service-dns.patient-management:4000
           predicates:
             - Path=/api/patients/**
           filters:
@@ -27,7 +27,7 @@ spring:
 
         # Route for /api/docs/patients to patient-service /v3/api-docs
         - id: api-docs-patient-route
-          uri: http://patient-service.patient-management:4000
+          uri: http://patient-service-dns.patient-management:4000
           predicates:
             - Path=/api-docs/patients
           filters:
