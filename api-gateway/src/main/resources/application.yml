@@ -1,6 +1,10 @@
 server:
   port: 4004 # Gateway listens on port 4004
 
+logging:
+  level:
+    org.springframework.cloud.gateway: DEBUG
+
 spring:
   cloud:
     gateway:
@@ -10,7 +14,7 @@ spring:
           predicates:
             - Path=/auth/**
           filters:
-            - StripPrefix=1
+            - RewritePath=/auth/?(?<segment>.*), /${segment}
 
         # Route for /api/patients/** to patient-service
         - id: patient-service-route
